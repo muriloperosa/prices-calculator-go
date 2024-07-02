@@ -45,14 +45,15 @@ func (fm FileManager) ReadLines() ([]string, error) {
 }
 
 func (fm FileManager) WriteResult(data any) error {
+
+	time.Sleep(time.Second * 3) // Simulate slow file process
+
 	file, err := os.Create(fm.OutputFilePath)
 	if err != nil {
 		return err
 	}
 
 	defer file.Close()
-
-	time.Sleep(time.Second * 3) // Simulate slow file process
 
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(data)

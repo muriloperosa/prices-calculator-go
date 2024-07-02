@@ -5,6 +5,7 @@ import (
 
 	"github.com/muriloperosa/prices-calculator-go/filemanager"
 	"github.com/muriloperosa/prices-calculator-go/prices"
+	"github.com/muriloperosa/prices-calculator-go/storage"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 		errChannels[index] = make(chan error)
 
 		// file io
-		fm := filemanager.New("storage/input/prices.txt", fmt.Sprintf("storage/output/result_%.0f.json", taxRate*100))
+		fm := filemanager.New(storage.INPUT_PATH+"prices.txt", fmt.Sprintf(storage.OUTPUT_PATH+"result_%.0f.json", taxRate*100))
 		priceJob := prices.NewTaxIncludedPriceJob(*fm, taxRate)
 
 		// cmd io
@@ -26,11 +27,6 @@ func main() {
 		// priceJob := prices.NewTaxIncludedPriceJob(*cmd, taxRate)
 
 		go priceJob.Process(doneChannels[index], errChannels[index])
-
-		// if err != nil {
-		// 	fmt.Println("Could not process job!")
-		// 	fmt.Println(err)
-		// }
 	}
 
 	for index, _ := range taxRates {
@@ -41,7 +37,7 @@ func main() {
 				fmt.Println(err)
 			}
 		case <-doneChannels[index]:
-			fmt.Println("Done!")
+			fmt.Printf("TaxIncludedPriceJob [%v]: Done! \n", index)
 		}
 	}
 }

@@ -6,8 +6,20 @@ import (
 	"os"
 )
 
-func ReadLines(filename string) ([]string, error) {
-	file, err := os.Open("prices.txt")
+type FileManager struct {
+	InputFilePath  string
+	OutputFilePath string
+}
+
+func New(inputFilePath string, outputFilePath string) *FileManager {
+	return &FileManager{
+		InputFilePath:  inputFilePath,
+		OutputFilePath: outputFilePath,
+	}
+}
+
+func (fm FileManager) ReadLines() ([]string, error) {
+	file, err := os.Open(fm.InputFilePath)
 
 	if err != nil {
 		defer file.Close()
@@ -33,8 +45,8 @@ func ReadLines(filename string) ([]string, error) {
 	return lines, nil
 }
 
-func WriteJSON(path string, data any) error {
-	file, err := os.Create(path)
+func (fm FileManager) WriteResult(data any) error {
+	file, err := os.Create(fm.OutputFilePath)
 	if err != nil {
 		return err
 	}

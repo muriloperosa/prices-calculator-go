@@ -31,11 +31,12 @@ func (job *TaxIncludedPriceJob) LoadData() error {
 	return nil
 }
 
-func (job *TaxIncludedPriceJob) Process() error {
+func (job *TaxIncludedPriceJob) Process(doneChannel chan bool, errChannel chan error) {
 	err := job.LoadData()
 
 	if err != nil {
-		return err
+		errChannel <- err
+		return
 	}
 
 	result := make(map[string]string)
@@ -45,7 +46,14 @@ func (job *TaxIncludedPriceJob) Process() error {
 		result[fmt.Sprintf("%.2f", price)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 	}
 	job.TaxIncludedPrices = result
-	return job.IOManager.WriteResult(job)
+
+	err = job.IOManager.WriteResult(job)
+	if err != nil {
+		errChannel <- err
+		return
+	}
+
+	doneChannel <- true
 }
 
 func NewTaxIncludedPriceJob(fm iomanager.IOManager, taxRate float64) *TaxIncludedPriceJob {
